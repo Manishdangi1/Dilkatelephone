@@ -27,7 +27,20 @@ export const metadata: Metadata = {
   description: "Dil se baat, bina judgement.",
   metadataBase: new URL("https://dilakatelephone.com"),
   icons: {
-    icon: "/icon.svg",
+    icon: "/answer-phone.jpg",
+    shortcut: "/answer-phone.jpg",
+    apple: "/answer-phone.jpg",
+  },
+  openGraph: {
+    title: "DilKaTelephone",
+    description: "Dil se baat, bina judgement.",
+    images: ["/answer-phone.jpg"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DilKaTelephone",
+    description: "Dil se baat, bina judgement.",
+    images: ["/answer-phone.jpg"],
   },
 };
 
