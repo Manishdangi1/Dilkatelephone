@@ -2,12 +2,19 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Room, RoomEvent, createLocalAudioTrack } from "livekit-client";
 import { Waveform } from "@/components/dilka/waveform";
 
 const HER_NAME = "Aarohi";
 const LIVEKIT_AGENT_ID = "AGT_B7A2D783";
 const LIVEKIT_API_URL = "https://developer.induslabs.io/api/livekit";
+const WEB_CALL_IMAGES = [
+  { src: "/082d46a28d214716684ac54df469ce18.jpg", alt: "Soft neon portrait" },
+  { src: "/98add44c72b1d2fd60b680aa47fe33ca.jpg", alt: "Purple late-night mood" },
+  { src: "/75cd6ab00301286037ea8322d44266ce.jpg", alt: "Warm romantic style portrait" },
+  { src: "/b21f825faa16069b33167366da6bbc19.jpg", alt: "Blue cinematic portrait" },
+] as const;
 
 function formatTime(totalSeconds: number) {
   const mins = Math.floor(totalSeconds / 60)
@@ -200,10 +207,10 @@ export function WebCallConsole() {
   }, [disconnectRoom]);
 
   return (
-    <section className="mx-auto max-w-4xl">
+    <section className="mx-auto max-w-6xl">
       {/* Hidden container for agent audio playback */}
       <div ref={remoteAudioContainerRef} className="sr-only" aria-hidden />
-      <div className="mb-6">
+      <div className="mb-6 flex items-center justify-between gap-3">
         <Link
           href="/"
           className="romance-btn inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-rose-50 transition-colors hover:bg-white/15"
@@ -211,45 +218,86 @@ export function WebCallConsole() {
           <span aria-hidden>←</span>
           Back
         </Link>
+        <p className="soft-pill inline-flex items-center gap-2 px-4 py-2 text-xs uppercase tracking-[0.2em] text-rose-50/90">
+          <span
+            className={`h-2 w-2 rounded-full ${isRunning ? "bg-emerald-300 shadow-[0_0_10px_rgba(110,231,183,0.9)]" : "bg-rose-200/70"}`}
+          />
+          {isRunning ? "Live Session" : "Ready"}
+        </p>
       </div>
-      <div className="glass-panel rounded-[2rem] px-5 py-8 text-center md:px-10 md:py-12">
-        <p className="text-sm uppercase tracking-[0.3em] text-rose-100/70">Web Call</p>
-        <h1 className="romance-title mt-3 text-4xl text-rose-50 md:text-5xl">{HER_NAME}</h1>
-        <p className="mt-2 text-lg text-rose-100/80">{formatTime(seconds)}</p>
 
-        <div className="mx-auto mt-8 w-full max-w-lg rounded-3xl border border-white/15 bg-black/20 p-6">
-          <Waveform bars={26} live={isRunning} className="min-h-28" />
+      <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+        <div className="glass-panel relative overflow-hidden rounded-[2rem] px-5 py-8 text-center md:px-10 md:py-12">
+          <div className="absolute inset-0">
+            <Image
+              src={WEB_CALL_IMAGES[0].src}
+              alt={WEB_CALL_IMAGES[0].alt}
+              fill
+              className="object-cover opacity-20"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#2A0E23]/40 via-[#2A0E23]/68 to-[#2A0E23]/85" />
+          </div>
+
+          <div className="relative z-10">
+            <p className="text-sm uppercase tracking-[0.3em] text-rose-100/70">Web Call</p>
+            <h1 className="romance-title mt-3 text-4xl text-rose-50 md:text-5xl">{HER_NAME}</h1>
+            <p className="mt-2 text-lg text-rose-100/80">{formatTime(seconds)}</p>
+
+            <div className="mx-auto mt-8 w-full max-w-lg rounded-3xl border border-white/15 bg-black/20 p-6">
+              <Waveform bars={26} live={isRunning} className="min-h-28" />
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={toggleCall}
+                disabled={liveKitLoading}
+                className="romance-btn heartbeat rounded-full bg-[#F4C430] px-6 py-3 text-sm font-semibold text-[#2A0E23] disabled:opacity-60 md:text-base"
+              >
+                {liveKitLoading ? "Connecting…" : isRunning ? "Pause Call" : "Start Call"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsMuted((value) => !value)}
+                disabled={!isRunning}
+                className="romance-btn rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-rose-50 disabled:opacity-50 md:text-base"
+              >
+                {isMuted ? "Unmute" : "Mute"}
+              </button>
+
+              <button
+                type="button"
+                onClick={endCall}
+                className="romance-btn rounded-full border border-[#F6C1CC]/50 bg-[#F6C1CC]/20 px-6 py-3 text-sm font-medium text-rose-50 md:text-base"
+              >
+                End Call
+              </button>
+            </div>
+
+            <p className="mt-6 text-sm text-rose-100/78 md:text-base">{statusLine}</p>
+          </div>
         </div>
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={toggleCall}
-            disabled={liveKitLoading}
-            className="romance-btn heartbeat rounded-full bg-[#F4C430] px-6 py-3 text-sm font-semibold text-[#2A0E23] disabled:opacity-60 md:text-base"
-          >
-            {liveKitLoading ? "Connecting…" : isRunning ? "Pause Call" : "Start Call"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsMuted((value) => !value)}
-            disabled={!isRunning}
-            className="romance-btn rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium text-rose-50 disabled:opacity-50 md:text-base"
-          >
-            {isMuted ? "Unmute" : "Mute"}
-          </button>
-
-          <button
-            type="button"
-            onClick={endCall}
-            className="romance-btn rounded-full border border-[#F6C1CC]/50 bg-[#F6C1CC]/20 px-6 py-3 text-sm font-medium text-rose-50 md:text-base"
-          >
-            End Call
-          </button>
-        </div>
-
-        <p className="mt-6 text-sm text-rose-100/78 md:text-base">{statusLine}</p>
+        <aside className="glass-panel rounded-[2rem] p-4 md:p-5">
+          <p className="text-xs uppercase tracking-[0.24em] text-rose-100/70">Session Moodboard</p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {WEB_CALL_IMAGES.slice(1).map((image, index) => (
+              <div
+                key={image.src}
+                className={`relative overflow-hidden rounded-2xl border border-white/15 ${index === 0 ? "col-span-2 h-40" : "h-32"}`}
+              >
+                <Image src={image.src} alt={image.alt} fill className="object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/35 to-transparent" />
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 space-y-2 text-left">
+            <p className="text-sm text-rose-100/82">Private connection. Soft tone. Zero pressure.</p>
+            <p className="text-xs text-rose-100/65">All images on this page are unique and theme-matched.</p>
+          </div>
+        </aside>
       </div>
     </section>
   );
